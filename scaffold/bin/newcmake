@@ -1,0 +1,39 @@
+#!/usr/bin/bash
+
+# little tool to scaffold cmake cpp project
+# works well with scripts in cmake-cl/bin
+
+if [[ -z "$1" ]]
+then
+    echo "Please provide a project-name"
+    exit 1
+fi
+
+full_path="$PWD"/"$1"
+
+if [[ -d "$full_path" ]]
+then
+    echo "Directory already exists"
+    exit 1
+fi
+
+# find template folder relative to this script location
+base_dir="$(basename "$0")"
+template_path="$(echo $0 | sed "s/\/$base_dir//")/../templates"
+
+# create project root
+mkdir $full_path
+
+# move cmake gitignore to project root
+cp "$template_path/gitignore" "$full_path"/.gitignore
+
+# create default cmake file in project root
+cat "$template_path/CMakeLists.txt" | sed "s/%PROJECT%/$1/" \
+> "$full_path"/CMakeLists.txt
+
+# make project src folder
+mkdir "$full_path/src"
+
+# create a simple main file in src folder
+echo -e "#include <iostream>\n\nint main() {\n\tstd::cout \
+<< \"Hello World!\\\n\";\n\treturn 0;\n}\n" > "$full_path/src/main.cpp"

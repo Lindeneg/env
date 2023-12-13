@@ -1,0 +1,69 @@
+#!/usr/bin/bash
+
+# cmake utility to easily switch between
+# compilers and makefile generators
+
+HELP=$(cat <<-END
+cmg -[FLAG] [VALUE]
+
+FLAG  DESCRIPTION
+-c    C Compiler
+-cxx  C++ Compiler
+-make Makefile flavour
+-mode Build Mode
+END
+
+)
+
+if [[ $# -eq 0 ]]
+then
+    echo "At least one parameter must be used."
+    echo "$HELP"
+    exit 1
+fi
+
+if [[ $(($# % 2)) -gt 0 ]]
+then
+    echo "Argument count unbalanced."
+    echo "Each used parameter takes one value."
+    echo $HELP
+    exit 1
+fi
+
+CURRENT_FLAG=
+function set_flag() {
+    case "$CURRENT_FLAG" in
+        "-c")
+            C_COMPILER=$1
+            ;;
+        "-cxx")
+            CXX_COMPILER=$1
+            ;;
+        "-make")
+            GENERATOR=$1
+            ;;
+        "-mode")
+            BUILD_MODE="${1^^}"
+            ;;
+        "*")
+            echo "Unknown value '$1' for flag '$CURRENT_FLAG'"
+            exit 1
+            ;;
+    esac
+}
+
+for flag in "$@"
+do
+    if [[ -n "$CURRENT_FLAG" ]]
+    then
+        set_flag "$flag"
+        CURRENT_FLAG=
+        continue
+    elif [[ "$flag" == -* ]] then
+        CURRENT_FLAG="$flag"
+        continue
+    fi
+done
+
+CL_BUILD_MODE="$BUILD_MODE" cmake -G "$GENERATOR" -D CMAKE_C_COMPILER="$C_COMPILER" -D CMAKE_CXX_COMPILER="$CXX_COMPILER" "$PWD"
+
