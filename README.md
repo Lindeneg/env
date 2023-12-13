@@ -1,5 +1,7 @@
 My environment on Windows 10.
-Effectively a Bash facade on top of a pure NT environment.
+Effectively a Bash facade on top of a pure NT environment. 
+
+I tried WSL for a while but did not like it. I liked WSL2 more but since settling on the below setup, I hardly use WSL anyways.
 
 This is mostly just for myself, so I can easily retrieve my configurations.
 
