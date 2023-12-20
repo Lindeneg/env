@@ -1,4 +1,3 @@
-
 -- line numbers
 vim.opt.nu = true
 vim.opt.relativenumber = true
@@ -22,7 +21,7 @@ vim.opt.incsearch = true
 vim.termguicolors = true
 
 vim.opt.wrap = false
-vim.opt.colorcolumn = "80"
+vim.opt.colorcolumn = "100"
 vim.opt.scrolloff = 8
 vim.opt.updatetime = 50
 
