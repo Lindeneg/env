@@ -4,7 +4,7 @@ local format_ignore_map = {c=1, cpp=1,h=1,hpp=1,go=1}
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     pattern = { "*" },
     callback = function()
-        if format_ignore_map[vim.bo.filetype] ~= nil then
+        if format_ignore_map[vim.bo.filetype] ~= 1 then
             vim.cmd([[%s/\s\+$//e]])
         end
     end,

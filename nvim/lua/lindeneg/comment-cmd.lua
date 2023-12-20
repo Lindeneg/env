@@ -1,12 +1,13 @@
 local comment_map = {
     c="//", cpp="//", h="//", hpp="//", go="//",
-    lua="--", python="#", bash="#", js="//", ts="//"
+    lua="--", python="#", bash="#", js="//", javascript="//",
+    ts="//", typescript="//"
 }
 
 -- comment out selected lines
--- TODO: make two commands instead of one that 
+-- TODO: make two commands instead of one that
 -- (tries) to deduce correct action based on the first
--- two chars on each line. It works 98% but the remaning 2% 
+-- two chars on each line. It works 98% but the remaning 2%
 -- is annoyning as hell, so just make two seperate commands..
 vim.api.nvim_create_user_command(
 "Comment",

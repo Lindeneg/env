@@ -2,10 +2,14 @@ cmake_minimum_required(VERSION 3.26)
 project(%PROJECT%)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CL_CLANG_DEBUG_FLAGS "-ggdb -pedantic-errors -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion")
+set(CL_CLANG_DEBUG_FLAGS "-ggdb -pedantic-errors -Wall -D DEBUG -Weffc++ -Wextra -Wconversion -Wsign-conversion")
 set(CL_CLANG_RELEASE_FLAGS "-O2 -DNDEBUG")
 set(CL_GNU_DEBUG_FLAGS "-static-libstdc++ ${CL_CLANG_DEBUG_FLAGS}")
 set(CL_GNU_RELEASE_FLAGS "-static-libstdc++ -s ${CL_CLANG_RELEASE_FLAGS}")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 function(set_flags mode debug_flags release_flags)
     if ("${mode}" STREQUAL "RELEASE")
