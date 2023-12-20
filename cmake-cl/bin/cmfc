@@ -1,5 +1,3 @@
 #!/usr/bin/bash
 
-# cmake files? get out of here!! (except CMakeLists.txt.. you can stay)
-
-rm -rf *.exe *.pdb "$PWD"/.cmake "$PWD"/CmakeCache.txt "$PWD"/CMakeFiles "$PWD"/Makefile "$PWD"/cmake_install.cmake
+rm -rf "$PWD"/bin/*.exe "$PWD"/bin/*.pdb "$PWD"/.cache "$PWD"/compile_commands.json "$PWD"/.cmake "$PWD"/CmakeCache.txt "$PWD"/CMakeFiles "$PWD"/Makefile "$PWD"/cmake_install.cmake

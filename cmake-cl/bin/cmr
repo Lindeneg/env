@@ -2,8 +2,8 @@
 
 # a stupid wrapper that runs an executable of the
 # same name as the folder where that executable resides
-# i.e ~/hello/there/kenobi -> ./kenobi.exe
+# i.e ~/hello/there/kenobi/ -> ./bin/kenobi.exe
 
 FN="$(basename "$PWD")"
 
-"$PWD"/"$FN".exe
+"$PWD"/bin/"$FN".exe
