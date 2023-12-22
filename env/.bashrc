@@ -24,6 +24,23 @@ notebook () {
     py $VIRTUAL_ENV/Lib/site-packages/notebook
 }
 
+update_nvim_dotfile () {
+    rm -rf /d/dev/dotfiles/nvim
+    cp -r ~/AppData/Local/nvim /d/dev/dotfiles/nvim
+}
+
+update_bashrc_dotfile () {
+    rm /d/dev/dotfiles/env/.bashrc
+    cp ~/.bashrc /d/dev/dotfiles/env
+}
+
+update_dotfiles () {
+    echo "Updating nvim cfg"
+    update_nvim_dotfile
+    echo "Updating .bashrc"
+    update_bashrc_dotfile
+}
+
 # counts commit diff between current branch and a remote (default: master)
 gdii () {
     local origin="master"
@@ -82,7 +99,7 @@ gprd () {
     fi
 }
 
-# sets environmental values from .env file 
+# sets environmental values from .env file
 # (I love this fn, thank you Abdallah!)
 envs () {
     ENV_FILE=".env"
@@ -162,6 +179,9 @@ alias ys="yarn start"
 alias ye="yarn serve"
 alias studio="yarn prisma studio"
 alias gnl="npx generate-next-links@latest"
+alias lua="lua52.exe"
 
+export SDL2_PATH="D:/SDL/SDL2-2.28.4/x86_64-w64-mingw32"
+export SDL2_IMAGE_PATH="D:/SDL/SDL2_image-2.8.1/x86_64-w64-mingw32"
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
