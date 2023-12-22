@@ -39,5 +39,7 @@ require("lazy").setup({
         'windwp/nvim-autopairs',
         event = "InsertEnter",
         opts = {}
-    }
+    },
+    "MunifTanjim/prettier.nvim",
+    "jose-elias-alvarez/null-ls.nvim"
 })
