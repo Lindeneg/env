@@ -15,14 +15,13 @@ vim.opt.backup = false
 vim.opt.undodir = vim.fn.expand("~/.vim/undodir")
 vim.opt.undofile = true
 
-vim.opt.hlsearch = false
+vim.opt.hlsearch = true
 vim.opt.incsearch = true
 
 vim.termguicolors = true
 
-vim.opt.wrap = false
+vim.opt.wrap = true
 vim.opt.colorcolumn = "100"
 vim.opt.scrolloff = 8
 vim.opt.updatetime = 50
 
---vim.opt.shell = "bash.exe"

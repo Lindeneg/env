@@ -41,5 +41,6 @@ require("lazy").setup({
         opts = {}
     },
     "MunifTanjim/prettier.nvim",
-    "jose-elias-alvarez/null-ls.nvim"
+    "jose-elias-alvarez/null-ls.nvim",
+    "habamax/vim-godot"
 })
