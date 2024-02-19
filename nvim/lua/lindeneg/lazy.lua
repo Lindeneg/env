@@ -21,18 +21,15 @@ require("lazy").setup({
 
         dependencies = { "nvim-lua/plenary.nvim" }
     },
-    { "rose-pine/neovim", name = "rose-pine" },
     'morhetz/gruvbox',
     { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
     "nvim-treesitter/playground",
-    "theprimeagen/harpoon",
     "mbbill/undotree",
     {'VonHeikemen/lsp-zero.nvim', branch = 'v3.x'},
-    {'neovim/nvim-lspconfig'},
-    {'hrsh7th/cmp-nvim-lsp'},
-    {'hrsh7th/nvim-cmp'},
-    {'L3MON4D3/LuaSnip'},
-    'HiPhish/rainbow-delimiters.nvim',
+    'neovim/nvim-lspconfig',
+    'hrsh7th/cmp-nvim-lsp',
+    'hrsh7th/nvim-cmp',
+    'L3MON4D3/LuaSnip',
     'fatih/vim-go',
     'rhysd/vim-clang-format',
     {
@@ -42,5 +39,7 @@ require("lazy").setup({
     },
     "MunifTanjim/prettier.nvim",
     "jose-elias-alvarez/null-ls.nvim",
-    "habamax/vim-godot"
+    "habamax/vim-godot",
+    "alx741/vim-rustfmt",
+    "github/copilot.vim"
 })

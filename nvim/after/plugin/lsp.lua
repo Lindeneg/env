@@ -48,4 +48,4 @@ lsp.on_attach(function(client, bufnr)
     --vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
 end)
 
-lsp.setup_servers({"lua_ls", "pylsp", "tsserver", "html", "cssls", "csharp_ls", "cmake", "clangd", "gopls", "gdscript"})
+lsp.setup_servers({"lua_ls", "pylsp", "tsserver", "rust_analyzer", "html", "cssls", "csharp_ls", "cmake", "clangd", "gopls", "gdscript"})
