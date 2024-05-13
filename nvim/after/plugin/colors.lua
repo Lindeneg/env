@@ -1,4 +1,4 @@
-function setup_gruvbox()
+local function setup_gruvbox()
     -- https://github.com/morhetz/gruvbox/wiki/Configuration
     vim.g.gruvbox_contrast_dark = "hard"
     vim.g.gruvbox_number_column = "bg0"

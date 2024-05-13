@@ -2,8 +2,8 @@ require("lindeneg.utils")
 
 local os_map = {
     [OS_NAME.WINDOWS] = {
-        build="./misc/build.bat",
-        run="./misc/run.bat"
+        build=".\\misc\\build.bat",
+        run=".\\/misc\\run.bat"
     },
     [OS_NAME.UNIX] = {
         build="./misc/build.sh",
@@ -36,13 +36,14 @@ local run_map = {
 local clang = "ClangFormat"
 local prettier = "Prettier"
 local fmt_map = {
-    go="GoFmt",
+    --go="GoFmt",
     rust="Rustfmt",
     c=clang,
     cpp=clang,
     h=clang,
     hpp=clang,
     typescript=prettier,
+    typescriptreact=prettier,
     javascript=prettier,
     html=prettier,
     css=prettier,
@@ -52,9 +53,12 @@ local fmt_map = {
 vim.api.nvim_create_user_command(
 "GenericFormat",
 function()
+    if vim.bo.filetype == "go" then
+        return
+    end
     local cmd = fmt_map[vim.bo.filetype]
     if cmd == nil then
-        -- just remove trailing whitespacess
+        -- just remove trailing whitespaces
         vim.cmd([[%s/\s\+$//e]])
         return
     end

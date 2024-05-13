@@ -3,7 +3,7 @@ local COMMENT_MODE = "c"
 local comment_map = {
     c="//", cpp="//", h="//", hpp="//", go="//",
     lua="--", rust="//", python="#", sh="#", js="//", javascript="//",
-    ts="//", typescript="//", gdscript="#"
+    ts="//", typescript="//", typescriptreact="//", gdscript="#"
 }
 
 vim.api.nvim_create_user_command(

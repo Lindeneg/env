@@ -41,5 +41,6 @@ require("lazy").setup({
     "jose-elias-alvarez/null-ls.nvim",
     "habamax/vim-godot",
     "alx741/vim-rustfmt",
-    "github/copilot.vim"
+    --"github/copilot.vim"
 })
+

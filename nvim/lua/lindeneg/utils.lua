@@ -13,7 +13,7 @@ function GetOS()
     if sep == '/' then
         return OS_NAME.UNIX
     elseif sep == '\\' then
-        return OS_NAME.WINDOWS 
+        return OS_NAME.WINDOWS
     else
         return OS_NAME.UNKNOWN
     end
