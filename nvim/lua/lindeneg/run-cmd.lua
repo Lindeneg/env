@@ -3,23 +3,20 @@ require("lindeneg.utils")
 local os_map = {
     [OS_NAME.WINDOWS] = {
         build=".\\misc\\build.bat",
-        run=".\\/misc\\run.bat"
+        run=".\\misc\\generate.bat"
     },
     [OS_NAME.UNIX] = {
-        build="./misc/build.sh",
-        run="./misc/run.sh"
+        build="make",
+        run="cmake ."
     }
 }
 
 local os_cmds = os_map[GetOS()]
 
-if os_cmds == nil then
-    return
-end
-
 local RUN_MODE = "r"
 
 local build_map = {
+    go="make build",
     typescript="yarn build",
     javascript="yarn build",
     cs="dotnet build",
@@ -27,6 +24,7 @@ local build_map = {
 }
 
 local run_map = {
+    go="make run",
     rust="cargo run",
     typescript="yarn start",
     javascript="yarn start",
@@ -36,7 +34,6 @@ local run_map = {
 local clang = "ClangFormat"
 local prettier = "Prettier"
 local fmt_map = {
-    --go="GoFmt",
     rust="Rustfmt",
     c=clang,
     cpp=clang,
@@ -54,6 +51,8 @@ vim.api.nvim_create_user_command(
 "GenericFormat",
 function()
     if vim.bo.filetype == "go" then
+        vim.cmd("GoImports")
+        vim.cmd("GoFmt")
         return
     end
     local cmd = fmt_map[vim.bo.filetype]

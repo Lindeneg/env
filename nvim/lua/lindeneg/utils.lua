@@ -1,11 +1,11 @@
 OS_NAME = {
     WINDOWS = "Windows",
     UNIX = "Unix/Linux",
-    UNKNOWN = "GetFucked"
+    UNKNOWN = "Unknwon"
 }
 
 -- no support in lua to get the current arch
--- so we utilize the fact that MS in their infinite 
+-- so we utilize the fact that MS in their infinite
 -- wisdom decided to use the universially accepted
 -- symbol for escape, \, as their path seperator.
 function GetOS()

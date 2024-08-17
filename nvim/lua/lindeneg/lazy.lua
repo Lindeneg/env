@@ -13,7 +13,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    "folke/which-key.nvim",
     { "folke/neoconf.nvim", cmd = "Neoconf" },
     "folke/neodev.nvim",
     {
@@ -21,7 +20,7 @@ require("lazy").setup({
 
         dependencies = { "nvim-lua/plenary.nvim" }
     },
-    'morhetz/gruvbox',
+    "Lindeneg/gruvbox",
     { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
     "nvim-treesitter/playground",
     "mbbill/undotree",
@@ -30,7 +29,7 @@ require("lazy").setup({
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/nvim-cmp',
     'L3MON4D3/LuaSnip',
-    'fatih/vim-go',
+    'darrikonn/vim-gofmt',
     'rhysd/vim-clang-format',
     {
         'windwp/nvim-autopairs',
@@ -39,8 +38,7 @@ require("lazy").setup({
     },
     "MunifTanjim/prettier.nvim",
     "jose-elias-alvarez/null-ls.nvim",
-    "habamax/vim-godot",
     "alx741/vim-rustfmt",
-    --"github/copilot.vim"
+    "Hoffs/omnisharp-extended-lsp.nvim",
 })
 
