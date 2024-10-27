@@ -1,0 +1,11 @@
+--- /d/dev/games/ascella2/godot-cpp/tools/targets.py	2024-10-27 14:10:21.804301100 +0100
++++ /d/dev/cl-trading/godot-cpp/tools/targets.py	2024-07-21 19:56:37.060255500 +0200
+@@ -2,7 +2,7 @@
+ import subprocess
+ import sys
+ from SCons.Script import ARGUMENTS
+-from SCons.Variables import *
++from SCons.Variables import BoolVariable, EnumVariable
+ from SCons.Variables.BoolVariable import _text2bool
+ 
+ 

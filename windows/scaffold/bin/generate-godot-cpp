@@ -1,0 +1,421 @@
+#!/usr/bin/env bash
+
+if [[ -z "$1" ]] then
+    echo "generate-godot-cpp PROJECT_NAME GODOT_EXECUTABLE_PATH"
+    exit 1
+fi
+
+NAME=$(basename "$1")
+
+if [[ -d "$NAME" ]] then
+    echo "'$NAME' is already a folder"
+    exit 1
+fi
+
+if [[ -z "$2" ]] then
+    echo "generate-godot-cpp PROJECT_NAME GODOT_EXECUTABLE_PATH"
+    exit 1
+fi
+
+PATCHES=("targets" "windows" "linux" "ios")
+PATCH_PREFIX=$(dirname "$0")/../templates/godot_tools_
+MIN_NO_PATCH="4.3"
+GDX="$2"
+VERSION_RAW="$("$GDX" --version)"
+VERSION=$(echo "$VERSION_RAW" | sed -n 's/^\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')
+MAJOR_MINOR=$(echo "$VERSION" | cut -d. -f1,2)
+REMOTE=https://github.com/godotengine/godot-cpp
+TAG="godot-${VERSION}-stable"
+
+if ! git ls-remote --tags "$REMOTE" | grep -q "refs/tags/$TAG"; then
+    echo "Tag '$TAG' does not exist on '$REMOTE'."
+    exit 1
+fi
+
+echo "Setting up new Godot GDExtension C++ Project"
+echo "Detected Godot version: '${VERSION}'"
+echo "Using tag '${TAG}' from remote '${REMOTE}'"
+
+LNAME="${NAME,,}"
+UNAME="${NAME^^}"
+RPATH="$PWD/${LNAME}"
+
+read -r -d '' UTILS_H << EOM
+#ifndef ${UNAME}_UTILS_H_
+#define ${UNAME}_UTILS_H_
+
+#include <cstdarg>
+#include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/resource.hpp>
+#include <godot_cpp/classes/wrapped.hpp>
+#include <godot_cpp/core/binder_common.hpp>
+
+#define MAKE_RESOURCE_TYPE_HINT(m_type) \
+    vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, m_type)
+
+#define GDSTR(s) Utils::convert_gd_string(s)
+
+#define MAKE_LOG(name, cls)       \
+    namespace godot::${LNAME} {         \
+    static void name NEW_LOG(cls) \
+    }  // namespace godot::${LNAME}
+
+#define MAKE_M_LOG(name, cls)       \
+    namespace godot::${LNAME} {           \
+    static void name NEW_M_LOG(cls) \
+    }  // namespace godot::${LNAME}
+
+#define NEW_LOG(cls)                          \
+    (const cls *t, const char *format, ...) { \
+        if (!t->get_debug()) return;          \
+        va_list args;                         \
+        va_start(args, format);               \
+        printf(#cls);                         \
+        printf(": %s ", GDSTR(t));            \
+        vprintf(format, args);                \
+        va_end(args);                         \
+    }
+
+#define NEW_M_LOG(cls)                            \
+    (const bool debug, const char *format, ...) { \
+        if (!debug) return;                       \
+        va_list args;                             \
+        va_start(args, format);                   \
+        printf("%s: ", #cls);                     \
+        vprintf(format, args);                    \
+        va_end(args);                             \
+    }
+
+#define DEBUG_METHODS()                              \
+    inline bool get_debug() const { return debug_; } \
+    inline void set_debug(const bool d) { debug_ = d; }
+
+#define DEBUG_BIND(cls)                                                \
+    ClassDB::bind_method(D_METHOD("get_debug"), &cls::get_debug);      \
+    ClassDB::bind_method(D_METHOD("set_debug", "d"), &cls::set_debug); \
+    ClassDB::add_property(#cls, PropertyInfo(Variant::BOOL, "debug"),  \
+                          "set_debug", "get_debug");
+namespace godot {
+class String;
+class StringName;
+class Callable;
+}  // namespace godot
+
+namespace godot::${LNAME} {
+
+class Utils : public Object {
+    GDCLASS(Utils, Object)
+
+   protected:
+    static void _bind_methods();
+
+   public:
+    template <typename T>
+    static T *create_component(Node *owner, bool add_child = true) {
+        T *obj = memnew(T);
+        if (add_child) {
+            owner->add_child(obj);
+            obj->set_owner(owner);
+        }
+        return obj;
+    }
+
+    static bool is_in_editor();
+    static bool is_in_game();
+    static const char *convert_gd_string(const Node *n);
+    static const char *convert_gd_string(const Resource *n);
+    static const char *convert_gd_string(String s);
+    static const char *convert_gd_string(StringName s);
+    static void connect(Node *node, const StringName name,
+                        const Callable &callable);
+    static void disconnect(Node *node, const StringName name,
+                           const Callable &callable);
+    static void queue_delete(Node *node);
+};
+}  // namespace godot::${LNAME}
+
+#endif  // ${UNAME}_UTILS_H_
+EOM
+
+read -r -d '' UTILS_CPP << EOM
+#include "utils.h"
+
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/classes/object.hpp>
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/core/error_macros.hpp>
+#include <godot_cpp/variant/callable.hpp>
+
+bool godot::${LNAME}::Utils::is_in_editor() {
+    return godot::Engine::get_singleton()->is_editor_hint();
+}
+
+bool godot::${LNAME}::Utils::is_in_game() { return !(is_in_editor()); }
+
+const char *godot::${LNAME}::Utils::convert_gd_string(const Node *n) {
+    ERR_FAIL_NULL_V_MSG(n, "", "cannot get_name on node that is nullptr");
+    return convert_gd_string(n->get_name());
+}
+
+const char *godot::${LNAME}::Utils::convert_gd_string(const Resource *n) {
+    ERR_FAIL_NULL_V_MSG(n, "", "cannot get_name on resource that is nullptr");
+    return convert_gd_string(n->get_name());
+}
+
+const char *godot::${LNAME}::Utils::convert_gd_string(StringName s) {
+    return convert_gd_string(String(s));
+}
+
+const char *godot::${LNAME}::Utils::convert_gd_string(String s) {
+    return s.utf8().get_data();
+}
+
+void godot::${LNAME}::Utils::connect(Node *node, const StringName name,
+                               const Callable &callable) {
+    ERR_FAIL_NULL_MSG(node, vformat("cannot connect to signal %s", name));
+    if (!node->is_connected(name, callable)) {
+        if (node->connect(name, callable) != OK) {
+            WARN_PRINT_ED(vformat("%s failed to connect to signal %s",
+                                  node->get_name(), name));
+        }
+    }
+}
+
+void godot::${LNAME}::Utils::disconnect(Node *node, const StringName name,
+                                  const Callable &callable) {
+    if (node == nullptr) return;
+    if (node->is_connected(name, callable)) {
+        node->disconnect(name, callable);
+    }
+}
+
+void godot::${LNAME}::Utils::queue_delete(Node *node) {
+    if (node == nullptr || node->is_queued_for_deletion()) {
+        return;
+    }
+    node->queue_free();
+}
+
+void godot::${LNAME}::Utils::_bind_methods() { }
+EOM
+
+read -r -d '' GDEXTENSION << EOM
+[configuration]
+
+entry_symbol = "${LNAME}_extension_library_init"
+compatibility_minimum = "${VERSION}"
+
+[libraries]
+
+windows.debug.x86_64 = "res://bin/${LNAME}-extension.windows.template_debug.x86_64.dll"
+windows.editor.x86_64 = "res://bin/${LNAME}-extension.windows.editor.x86_64.dll"
+windows.release.x86_64 = "res://bin/${LNAME}-extension.windows.template_release.x86_64.dll"
+EOM
+
+read -r -d '' GDPROJECT << EOM
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="$1"
+config/features=PackedStringArray("${MAJOR_MINOR}", "Mobile")
+config/icon="res://icon.svg"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+EOM
+
+read -r -d '' GDICON << EOM
+<svg height="128" width="128" xmlns="http://www.w3.org/2000/svg">
+   <rect x="2" y="2" width="124" height="124" rx="14" fill="#363d52" stroke="#212532" stroke-width="4"/>
+   <g transform="scale(.101) translate(122 122)">
+      <g fill="#fff">
+         <path d="M105 673v33q407 354 814 0v-33z"/>
+         <path fill="#478cbf" d="m105 673 152 14q12 1 15 14l4 67 132 10 8-61q2-11 15-15h162q13 4 15 15l8 61 132-10 4-67q3-13 15-14l152-14V427q30-39 56-81-35-59-83-108-43 20-82 47-40-37-88-64 7-51 8-102-59-28-123-42-26 43-46 89-49-7-98 0-20-46-46-89-64 14-123 42 1 51 8 102-48 27-88 64-39-27-82-47-48 49-83 108 26 42 56 81zm0 33v39c0 276 813 276 813 0v-39l-134 12-5 69q-2 10-14 13l-162 11q-12 0-16-11l-10-65H447l-10 65q-4 11-16 11l-162-11q-12-3-14-13l-5-69z"/>
+         <path d="M483 600c3 34 55 34 58 0v-86c-3-34-55-34-58 0z"/>
+         <circle cx="725" cy="526" r="90"/>
+         <circle cx="299" cy="526" r="90"/>
+      </g>
+      <g fill="#414042">
+         <circle cx="307" cy="532" r="60"/>
+         <circle cx="717" cy="532" r="60"/>
+      </g>
+   </g>
+</svg>
+EOM
+
+read -r -d '' SCONSTRUCT << EOM
+#!/usr/bin/env python
+import os
+import sys
+
+env = SConscript("godot-cpp/SConstruct")
+
+env.Append(CPPPATH=["src/core/", "src/nodes/", "src/register"])
+
+if env["target"] == "template_debug" or env["target"] == "editor":
+    env.Append(CPPDEFINES=["${UNAME}_EXTENSION_DEBUG=1"])
+
+sources = Glob("src/**/*.cpp")
+library = env.SharedLibrary(
+        "${LNAME}/bin/${LNAME}-extension{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        source=sources)
+
+Default(library)
+EOM
+
+read -r -d '' GITIGNORE << EOM
+# Godot 4+ specific ignores
+.godot/
+*.tmp
+
+# Godot-specific ignores
+.import/
+export.cfg
+export_presets.cfg
+
+# Imported translations (automatically generated from CSV files)
+*.translation
+
+# Mono-specific ignores
+.mono/
+data_*/
+mono_crash.*.json
+.cache
+.sconsign*
+
+# stuff and things
+.idea
+extension_api.json
+compile_commands.json
+notes.txt
+.vs
+*.o
+*.obj
+*.a
+*.pdb
+*.rdbg
+*.dll
+*.exp
+*.lib
+EOM
+
+read -r -d '' REGISTER_TYPES_H << EOM
+#ifndef ${UNAME}_EXTENSION_REGISTER_TYPES_H_
+#define ${UNAME}_EXTENSION_REGISTER_TYPES_H_
+
+#include <godot_cpp/core/class_db.hpp>
+
+using namespace godot;
+
+void initialize_${LNAME}_extension_module(ModuleInitializationLevel p_level);
+void uninitialize_${LNAME}_extension_module(ModuleInitializationLevel p_level);
+
+#endif  // ${UNAME}_EXTENSION_REGISTER_TYPES_H_
+EOM
+
+read -r -d '' REGISTER_TYPES_CPP << EOM
+#include "register_types.h"
+
+#include <gdextension_interface.h>
+
+#include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/godot.hpp>
+
+#include "../core/utils.h"
+
+using namespace godot;
+
+void initialize_${LNAME}_extension_module(ModuleInitializationLevel p_level) {
+    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+        return;
+    }
+    ClassDB::register_class<${LNAME}::Utils>();
+}
+
+void uninitialize_${LNAME}_extension_module(ModuleInitializationLevel p_level) {
+    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+        return;
+    }
+}
+
+extern "C" {
+GDExtensionBool GDE_EXPORT
+${LNAME}_extension_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address,
+                          const GDExtensionClassLibraryPtr p_library,
+                          GDExtensionInitialization *r_initialization) {
+    godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address,
+                                                   p_library, r_initialization);
+
+    init_obj.register_initializer(initialize_${LNAME}_extension_module);
+    init_obj.register_terminator(uninitialize_${LNAME}_extension_module);
+    init_obj.set_minimum_library_initialization_level(
+        MODULE_INITIALIZATION_LEVEL_SCENE);
+
+    return init_obj.init();
+}
+}
+EOM
+
+echo "Creating core folders"
+mkdir -p "$RPATH/$LNAME/bin"
+cd "$RPATH"
+mkdir -p assets misc src/core src/register src/nodes
+
+echo "Creating core files"
+touch assets/.gitkeep
+echo "$GITIGNORE" > "${RPATH}/.gitignore"
+echo "$GDEXTENSION" > "$LNAME/bin/${LNAME}-extension.gdextension"
+echo "$GDPROJECT" > "$LNAME/project.godot"
+echo "$GDICON" > "$LNAME/icon.svg"
+echo "$REGISTER_TYPES_H" > "src/register/register_types.h"
+echo "$REGISTER_TYPES_CPP" > "src/register/register_types.cpp"
+echo "$UTILS_H" > "src/core/utils.h"
+echo "$UTILS_CPP" > "src/core/utils.cpp"
+echo "scons -j14 platform=windows arch=x86_64 target=template_debug debug_symbols=yes compiledb=yes" > "misc/build.sh"
+echo "${GDX} ./$LNAME/project.godot" > "misc/run.sh"
+
+chmod +x misc/build.sh
+chmod +x misc/run.sh
+
+echo "Cloning godot-cpp.. Please wait.. (could take a few mins)"
+git init > /dev/null 2>&1
+git submodule add "${REMOTE}" > /dev/null 2>&1
+cd "$RPATH/godot-cpp"
+git checkout "tags/${TAG}" > /dev/null 2>&1
+git submodule update --init > /dev/null 2>&1
+
+echo "Dumping extension_api.json"
+cd "$RPATH"
+"$GDX" --dump-extension-api > /dev/null
+
+if [[ "$(echo -e "$VERSION\n$MIN_NO_PATCH" | sort -V | head -n1)" != "$MIN_NO_PATCH" ]]; then
+    echo "Patching godot-cpp tools"
+    for patch_name in "${PATCHES[@]}"; do
+        patch "./godot-cpp/tools/${patch_name}.py" < "${PATCH_PREFIX}${patch_name}.patch"
+    done
+fi
+
+echo "compiling godot-cpp with extension_api.. Please wait.. (could take a few mins)"
+cd "$RPATH/godot-cpp"
+scons -j14 custom_api_file=../extension_api.json platform=windows arch=x86_64 target=template_debug debug_symbols=yes compiledb=yes > /dev/null
+cd "$RPATH"
+mv godot-cpp/compile_commands.json .
+
+echo "$SCONSTRUCT" > "${RPATH}/SConstruct"
+echo "Compiling project '$LNAME'.. Please wait.. (could take a few mins)"
+./misc/build.sh > /dev/null 2>&1
+
+echo "Setup complete, now run:"
+echo "cd $LNAME && ./misc/run.sh"
+

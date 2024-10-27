@@ -1,0 +1,11 @@
+--- /d/dev/games/ascella2/godot-cpp/tools/windows.py	2024-10-27 14:10:21.805300900 +0100
++++ /d/dev/cl-trading/godot-cpp/tools/windows.py	2024-07-21 19:55:37.306338000 +0200
+@@ -3,7 +3,7 @@
+ import my_spawn
+ 
+ from SCons.Tool import msvc, mingw
+-from SCons.Variables import *
++from SCons.Variables import BoolVariable
+ 
+ 
+ def options(opts):

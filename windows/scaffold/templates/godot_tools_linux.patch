@@ -1,0 +1,8 @@
+--- /d/dev/games/ascella2/godot-cpp/tools/linux.py	2024-10-27 14:10:21.804301100 +0100
++++ /d/dev/cl-trading/godot-cpp/tools/linux.py	2024-07-21 19:55:48.687642100 +0200
+@@ -1,4 +1,4 @@
+-from SCons.Variables import *
++from SCons.Variables import BoolVariable
+ from SCons.Tool import clang, clangxx
+ 
+ 
