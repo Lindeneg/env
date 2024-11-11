@@ -39,6 +39,7 @@ require("lazy").setup({
     "MunifTanjim/prettier.nvim",
     "jose-elias-alvarez/null-ls.nvim",
     "alx741/vim-rustfmt",
-    "Hoffs/omnisharp-extended-lsp.nvim",
+    "Hoffs/omnisharp-extended-lsp.nvim"
+    --"github/copilot.vim"
 })
 

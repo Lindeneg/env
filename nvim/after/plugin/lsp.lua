@@ -98,4 +98,4 @@ lsp.on_attach(function(client, bufnr)
     --vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
 end)
 
-lsp.setup_servers({"omnisharp", "lua_ls", "pylsp", "tsserver", "rust_analyzer", "html", "cssls",  "cmake", "clangd", "gopls"})
+lsp.setup_servers({"omnisharp", "lua_ls", "pylsp", "ts_ls", "rust_analyzer", "html", "cssls",  "cmake", "clangd", "gopls"})

@@ -2,8 +2,8 @@ require("lindeneg.utils")
 
 local os_map = {
     [OS_NAME.WINDOWS] = {
-        build=".\\misc\\build.bat",
-        run=".\\misc\\generate.bat"
+        build=".\\misc\\build.sh",
+        run=".\\misc\\run.sh"
     },
     [OS_NAME.UNIX] = {
         build="make",
